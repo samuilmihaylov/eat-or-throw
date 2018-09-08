@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Eat Or Throw</string>
+    <string name="photo_image_text">Photo image</string>
+    <string name="snap_btn_text">Take photo</string>
+    <string name="edit_text_view_label">Expire date:</string>
 </resources>
