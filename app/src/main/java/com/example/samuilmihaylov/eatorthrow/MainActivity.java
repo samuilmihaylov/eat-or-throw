@@ -8,9 +8,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -26,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,8 +36,23 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
+    private static final List<String> formatStrings = Arrays.asList(
+            "M/y",
+            "M/d/y",
+            "M-d-y",
+            "M yyyy",
+            "MM yyyy",
+            "MM/yyyy",
+            "MM-dd-yyyy",
+            "dd/MM/yyyy",
+            "dd-MM-yyyy",
+            "dd.MM.yyyy",
+            "dd MM yyyy",
+            "ddMMyyyy");
+
     private ImageView mImageView;
     private EditText mTextView;
+    private Spinner mSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,20 +116,6 @@ public class MainActivity extends AppCompatActivity {
 
         LocalDate localDate = null;
 
-        List<String> formatStrings = Arrays.asList(
-                "M/y",
-                "M/d/y",
-                "M-d-y",
-                "M yyyy",
-                "MM yyyy",
-                "MM/yyyy",
-                "MM-dd-yyyy",
-                "dd/MM/yyyy",
-                "dd-MM-yyyy",
-                "dd.MM.yyyy",
-                "dd MM yyyy",
-                "ddMMyyyy");
-
         for (String formatString : formatStrings) {
             try {
 
@@ -152,46 +156,65 @@ public class MainActivity extends AppCompatActivity {
         }
 
         StringBuilder recognisedWords = new StringBuilder();
+        List<LocalDate> dateOptions = new ArrayList<>();
 
         for (int i = 0; i < blocks.size(); i++) {
             List<FirebaseVisionText.Line> lines = blocks.get(i).getLines();
             for (int j = 0; j < lines.size(); j++) {
 
-                LocalDate dateAsString = this.parseStringToDate(lines.get(j).getText());
+                LocalDate date = this.parseStringToDate(lines.get(j).getText());
 
-                if (dateAsString != null) {
+                if (date != null) {
                     recognisedWords.append("LINE: ")
                             .append(lines.get(j).getText());
                     recognisedWords.append(" | PARSED: ")
-                            .append(dateAsString)
+                            .append(date)
                             .append(" ");
                     recognisedWords
                             .append(System.getProperty("line.separator"));
+
+                    dateOptions.add(date);
                 }
 
                 List<FirebaseVisionText.Element> elements = lines.get(j).getElements();
                 for (int k = 0; k < elements.size(); k++) {
 
-                    dateAsString = this.parseStringToDate(elements.get(k).getText());
+                    date = this.parseStringToDate(elements.get(k).getText());
 
-                    if (dateAsString != null) {
+                    if (date != null) {
                         recognisedWords
                                 .append("ELEMENT: ")
                                 .append(elements.get(k).getText());
                         recognisedWords
                                 .append(" | PARSED: ")
-                                .append(dateAsString)
+                                .append(date)
                                 .append(" ");
                         recognisedWords
                                 .append(System.getProperty("line.separator"));
+
+                        dateOptions.add(date);
                     }
                 }
+
                 recognisedWords.append(System.getProperty("line.separator"));
             }
+
             recognisedWords.append(System.getProperty("line.separator"));
         }
 
-        mTextView.setText(recognisedWords);
+        if (dateOptions.size() == 0) {
+            showToast("Unsuccessful recognition of the expire date");
+
+            mSpinner = (Spinner) findViewById(R.id.expire_date_options_id);
+            // Create an ArrayAdapter using the string array and a default spinner layout
+            ArrayAdapter<LocalDate> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dateOptions);
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Apply the adapter to the spinner
+            mSpinner.setAdapter(adapter);
+
+            mTextView.setText(recognisedWords);
+        }
     }
 
     private void showToast(String message) {
@@ -200,5 +223,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearTextView() {
         mTextView.setText("");
+
+        if (mSpinner != null) {
+            mSpinner.setAdapter(null);
+        }
     }
 }
