@@ -2,6 +2,8 @@ package com.example.samuilmihaylov.eatorthrow;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -19,6 +21,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
@@ -34,7 +38,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_CAPTURE_EXPIRE_DATE = 1;
+    private static final int REQUEST_IMAGE_CAPTURE_BARCODE = 2;
 
     private static final List<String> formatStrings = Arrays.asList(
             "M/y",
@@ -65,26 +70,42 @@ public class MainActivity extends AppCompatActivity {
         mImageView = findViewById(R.id.photo_image_id);
         mTextView = findViewById(R.id.edit_text_view_id);
 
-        Button mSnapButton = findViewById(R.id.snap_btn_id);
-        mSnapButton.setOnClickListener(new View.OnClickListener() {
+        Button mSnapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
+        mSnapExpireDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 clearTextView();
-                dispatchTakePictureIntent();
+                dispatchTakePictureIntent(ImageCaptureActionType.EXPIRE_DATE);
+            }
+        });
+
+        Button mSnapBarcodeButton = findViewById(R.id.snap_barcode_btn_id);
+        mSnapBarcodeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent(ImageCaptureActionType.BARCODE);
             }
         });
     }
 
-    private void dispatchTakePictureIntent() {
+    private void dispatchTakePictureIntent(ImageCaptureActionType imageCaptureActionType) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+
+        if (imageCaptureActionType == ImageCaptureActionType.EXPIRE_DATE) {
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE_EXPIRE_DATE);
+            }
+
+        } else if (imageCaptureActionType == ImageCaptureActionType.BARCODE) {
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE_BARCODE);
+            }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE_EXPIRE_DATE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = null;
             if (extras != null) {
@@ -94,20 +115,57 @@ public class MainActivity extends AppCompatActivity {
 
             runTextRecognition(imageBitmap);
         }
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE_BARCODE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = null;
+            if (extras != null) {
+                imageBitmap = (Bitmap) extras.get("data");
+            }
+
+            runBarcodeRecognition(imageBitmap);
+        }
     }
 
-    private void runTextRecognition(Bitmap imageBitMap) {
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitMap);
-        FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
-        detector.processImage(image).addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
-            @Override
-            public void onSuccess(FirebaseVisionText firebaseVisionText) {
-                processTextRecognitionResult(firebaseVisionText);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
+    private void runBarcodeRecognition(Bitmap imageBitmap) {
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
+        FirebaseVisionBarcodeDetector firebaseVisionBarcodeDetector = FirebaseVision.getInstance()
+                .getVisionBarcodeDetector();
+
+        firebaseVisionBarcodeDetector.detectInImage(image)
+                .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                    @Override
+                    public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                        // Task completed successfully
+                        for (FirebaseVisionBarcode barcode : barcodes) {
+                            String rawValue = barcode.getRawValue();
+                            showToast(rawValue, MessageType.SUCCESS);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Task failed with an exception
+                        showToast("Error: Could not run the barcode recognition", MessageType.ERROR);
+                    }
+                });
+    }
+
+    private void runTextRecognition(Bitmap imageBitmap) {
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
+        FirebaseVisionTextRecognizer firebaseVisionTextRecognizer = FirebaseVision.getInstance()
+                .getOnDeviceTextRecognizer();
+        firebaseVisionTextRecognizer.processImage(image)
+                .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
+                    @Override
+                    public void onSuccess(FirebaseVisionText firebaseVisionText) {
+                        processTextRecognitionResult(firebaseVisionText);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                showToast("Error: Could not run the text recognition", MessageType.ERROR);
             }
         });
     }
@@ -134,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 localDate = LocalDate.parse(dateAsString, formatter);
-                showToast("Successfully recognition of the expire date");
+                showToast("Successfully recognition of the expire date", MessageType.SUCCESS);
 
                 return localDate;
             } catch (DateTimeParseException e) {
@@ -150,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
     private void processTextRecognitionResult(FirebaseVisionText text) {
         List<FirebaseVisionText.TextBlock> blocks = text.getTextBlocks();
 
-        if (blocks.size() == 0) {
-            showToast("No text found");
+        if (blocks.isEmpty()) {
+            showToast("No text found", MessageType.ERROR);
             return;
         }
 
@@ -202,10 +260,10 @@ public class MainActivity extends AppCompatActivity {
             recognisedWords.append(System.getProperty("line.separator"));
         }
 
-        if (dateOptions.size() == 0) {
-            showToast("Unsuccessful recognition of the expire date");
+        if (dateOptions.isEmpty()) {
+            showToast("Unsuccessful recognition of the expire date", MessageType.ERROR);
 
-            mSpinner = (Spinner) findViewById(R.id.expire_date_options_id);
+            mSpinner = findViewById(R.id.expire_date_options_id);
             // Create an ArrayAdapter using the string array and a default spinner layout
             ArrayAdapter<LocalDate> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dateOptions);
             // Specify the layout to use when the list of choices appears
@@ -217,8 +275,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    private void showToast(String message, MessageType messageType) {
+        Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT);
+        View view = toast.getView();
+
+        view.getBackground().setColorFilter(messageType == MessageType.ERROR ? Color.RED : Color.GREEN, PorterDuff.Mode.SRC_IN);
+
+        toast.show();
     }
 
     private void clearTextView() {

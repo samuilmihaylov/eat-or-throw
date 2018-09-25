@@ -53,12 +53,22 @@
         android:layout_below="@+id/expire_date_options_label_id" />
 
     <Button
-        android:id="@+id/snap_btn_id"
+        android:id="@+id/snap_expire_date_btn_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
-        android:text="@string/snap_btn_text" />
+        android:text="@string/snap_expire_date_btn_text" />
+
+    <Button
+        android:id="@+id/snap_barcode_btn_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_toEndOf="@+id/snap_expire_date_btn_id"
+        android:text="@string/snap_barcode_btn_text" />
 
 </RelativeLayout>

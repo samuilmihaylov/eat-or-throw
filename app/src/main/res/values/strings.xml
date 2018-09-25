@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Eat Or Throw</string>
     <string name="photo_image_text">Photo image</string>
-    <string name="snap_btn_text">Take photo</string>
+    <string name="snap_expire_date_btn_text">Snap Expire date</string>
     <string name="edit_text_view_label">Expire date:</string>
     <string name="recognized_date_options_label">Recognized date options:</string>
+    <string name="snap_barcode_btn_text">Snap Barcode</string>
 </resources>
