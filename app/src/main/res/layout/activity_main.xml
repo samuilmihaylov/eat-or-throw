@@ -1,74 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/photo_image_id"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="300dp"
-        android:maxWidth="300dp"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/photo_image_text"
-        android:scaleType="fitCenter"
-        android:src="@drawable/photo_placeholder"
-        android:text="@string/photo_image_text" />
-
-    <TextView
-        android:id="@+id/edit_text_label"
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view_text_recognition"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:layout_below="@+id/photo_image_id"
-        android:labelFor="@id/edit_text_view_id"
-        android:text="@string/edit_text_view_label"
-        android:textStyle="bold" />
+        android:layout_height="180dp"
+        android:layout_marginBottom="20dp"
+        card_view:cardCornerRadius="4dp">
 
-    <EditText
-        android:id="@+id/edit_text_view_id"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/expiry_date_image"
+            android:text="@string/click_to_scan_expire_date" />
+
+        <ImageView
+            android:id="@+id/expiry_date_image"
+            android:layout_width="fill_parent"
+            android:layout_height="140dp"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/productexpirydate"
+            android:scaleType="fitXY"
+            android:src="@drawable/expiry_date_placeholder" />
+
+        <TextView
+            android:id="@+id/info_text_text_recognition"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_below="@id/expiry_date_image" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view_barcode"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_text_label"
-        android:layout_centerHorizontal="true"
-        android:inputType=""
-        android:textStyle="bold" />
+        android:layout_height="180dp"
+        card_view:cardCornerRadius="4dp">
 
-    <TextView
-        android:id="@+id/expire_date_options_label_id"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_text_view_id"
-        android:padding="10sp"
-        android:text="@string/recognized_date_options_label"
-        android:textStyle="italic" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/expiry_date_image"
+            android:text="@string/click_to_scan_barcode" />
 
-    <Spinner
-        android:id="@+id/expire_date_options_id"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/expire_date_options_label_id" />
+        <ImageView
+            android:id="@+id/barcode_image"
+            android:layout_width="fill_parent"
+            android:layout_height="140dp"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/productbarcode"
+            android:scaleType="fitXY"
+            android:src="@drawable/barcode_placeholder" />
 
-    <Button
-        android:id="@+id/snap_expire_date_btn_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
-        android:text="@string/snap_expire_date_btn_text" />
+        <TextView
+            android:id="@+id/info_text_barcode"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+    </android.support.v7.widget.CardView>
 
-    <Button
-        android:id="@+id/snap_barcode_btn_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
-        android:layout_toEndOf="@+id/snap_expire_date_btn_id"
-        android:text="@string/snap_barcode_btn_text" />
-
-</RelativeLayout>
+</LinearLayout>

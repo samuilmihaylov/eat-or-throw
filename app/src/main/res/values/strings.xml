@@ -3,6 +3,17 @@
     <string name="photo_image_text">Photo image</string>
     <string name="snap_expire_date_btn_text">Snap Expire date</string>
     <string name="edit_text_view_label">Expire date:</string>
-    <string name="recognized_date_options_label">Recognized date options:</string>
+    <string name="recognized_date_options_label">Recognized alternative dates:</string>
     <string name="snap_barcode_btn_text">Snap Barcode</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="productexpirydate">productExpiryDate</string>
+    <string name="productbarcode">productbarcode</string>
+    <string name="click_to_scan_barcode">Click to navigate to barcode scan page</string>
+    <string name="click_to_scan_expire_date">Click to navigate to expire date scan page</string>
+    <string name="barcode_title">Title</string>
+    <string name="barcode_url">URL</string>
+    <string name="barcode_contact_info">Contact info</string>
+    <string name="barcode_email">Email</string>
 </resources>

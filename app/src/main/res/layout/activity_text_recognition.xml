@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.TextRecognitionActivity">
+
+    <ImageView
+        android:id="@+id/photo_image_id"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/photo_image_text"
+        android:maxWidth="300dp"
+        android:maxHeight="300dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/photo_placeholder"
+        android:text="@string/photo_image_text" />
+
+    <TextView
+        android:id="@+id/edit_text_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/photo_image_id"
+        android:labelFor="@id/edit_text_view_id"
+        android:paddingTop="20dp"
+        android:text="@string/edit_text_view_label"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/edit_text_view_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_text_label"
+        android:layout_centerHorizontal="true"
+        android:inputType=""
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/expire_date_options_label_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_text_view_id"
+        android:padding="10sp"
+        android:text="@string/recognized_date_options_label"
+        android:textStyle="italic" />
+
+    <Spinner
+        android:id="@+id/expire_date_options_id"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/expire_date_options_label_id" />
+
+    <Button
+        android:id="@+id/snap_expire_date_btn_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:text="@string/snap_expire_date_btn_text" />
+
+</RelativeLayout>
