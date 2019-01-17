@@ -97,7 +97,7 @@ public class BarcodeRecognitionActivity extends Activity {
                         )
                         .build();
 
-        imageBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+//        imageBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
         FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
 

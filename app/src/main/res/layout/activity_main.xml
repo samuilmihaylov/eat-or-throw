@@ -39,32 +39,32 @@
             android:layout_below="@id/expiry_date_image" />
     </android.support.v7.widget.CardView>
 
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/card_view_barcode"
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        card_view:cardCornerRadius="4dp">
+    <!--<android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"-->
+    <!--android:id="@+id/card_view_barcode"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="180dp"-->
+    <!--card_view:cardCornerRadius="4dp">-->
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/expiry_date_image"
-            android:text="@string/click_to_scan_barcode" />
+    <!--<TextView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_above="@id/expiry_date_image"-->
+    <!--android:text="@string/click_to_scan_barcode" />-->
 
-        <ImageView
-            android:id="@+id/barcode_image"
-            android:layout_width="fill_parent"
-            android:layout_height="140dp"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/productbarcode"
-            android:scaleType="fitXY"
-            android:src="@drawable/barcode_placeholder" />
+    <!--<ImageView-->
+    <!--android:id="@+id/barcode_image"-->
+    <!--android:layout_width="fill_parent"-->
+    <!--android:layout_height="140dp"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:adjustViewBounds="true"-->
+    <!--android:contentDescription="@string/productbarcode"-->
+    <!--android:scaleType="fitXY"-->
+    <!--android:src="@drawable/barcode_placeholder" />-->
 
-        <TextView
-            android:id="@+id/info_text_barcode"
-            android:layout_width="match_parent"
-            android:layout_height="200dp" />
-    </android.support.v7.widget.CardView>
+    <!--<TextView-->
+    <!--android:id="@+id/info_text_barcode"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="200dp" />-->
+    <!--</android.support.v7.widget.CardView>-->
 
 </LinearLayout>

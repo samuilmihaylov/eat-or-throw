@@ -16,4 +16,11 @@
     <string name="barcode_url">URL</string>
     <string name="barcode_contact_info">Contact info</string>
     <string name="barcode_email">Email</string>
+    <string name="edit_product_name_text_view_label">Product name</string>
+    <string name="edit_product_type_text_view_label">Product type</string>
+    <string name="save_btn">Save</string>
+    <string name="enter_product_type_placeholder">Enter product type</string>
+    <string name="enter_product_name_placeholder">Enter product name</string>
+    <string name="enter_expire_date_or_snapshot_it_placeholder">dd/MM/yyyy</string>
+    <string name="date_picker_btn_text">date_picker_btn_text</string>
 </resources>

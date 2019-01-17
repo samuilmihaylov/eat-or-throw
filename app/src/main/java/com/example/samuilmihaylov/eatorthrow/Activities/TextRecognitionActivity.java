@@ -6,16 +6,19 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.example.samuilmihaylov.eatorthrow.Enums.ImageCaptureActionType;
 import com.example.samuilmihaylov.eatorthrow.Enums.MessageType;
+import com.example.samuilmihaylov.eatorthrow.Fragments.DatePickerFragment;
 import com.example.samuilmihaylov.eatorthrow.R;
 import com.example.samuilmihaylov.eatorthrow.Utils.NotificationLogger;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,7 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class TextRecognitionActivity extends Activity {
+public class TextRecognitionActivity extends FragmentActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE_EXPIRE_DATE = 1;
 
@@ -73,7 +76,7 @@ public class TextRecognitionActivity extends Activity {
         mTextView = findViewById(R.id.edit_text_view_id);
         mSpinner = findViewById(R.id.expire_date_options_id);
 
-        Button mSnapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
+        ImageButton mSnapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
         mSnapExpireDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -237,5 +240,10 @@ public class TextRecognitionActivity extends Activity {
         if (mSpinner != null) {
             mSpinner.setAdapter(null);
         }
+    }
+
+    public void showDatePickerDialog(View v) {
+        DialogFragment newFragment = new DatePickerFragment();
+        newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 }
