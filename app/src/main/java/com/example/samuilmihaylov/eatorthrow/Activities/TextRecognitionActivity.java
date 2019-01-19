@@ -73,7 +73,7 @@ public class TextRecognitionActivity extends FragmentActivity {
         setContentView(R.layout.activity_text_recognition);
 
         mImageView = findViewById(R.id.photo_image_id);
-        mTextView = findViewById(R.id.edit_text_view_id);
+//        mTextView = findViewById(R.id.edit_text_view_id);
         mSpinner = findViewById(R.id.expire_date_options_id);
 
         ImageButton mSnapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
