@@ -17,10 +17,19 @@
     <string name="barcode_contact_info">Contact info</string>
     <string name="barcode_email">Email</string>
     <string name="edit_product_name_text_view_label">Product name</string>
-    <string name="edit_product_type_text_view_label">Product type</string>
     <string name="save_btn">Save</string>
-    <string name="enter_product_type_placeholder">Enter product type</string>
+    <string name="enter_product_category_placeholder">Enter product category</string>
     <string name="enter_product_name_placeholder">Enter product name</string>
-    <string name="enter_expire_date_or_snapshot_it_placeholder">dd/MM/yyyy</string>
+    <string name="enter_expire_date_or_snapshot_it_placeholder">dd/mm/yy</string>
     <string name="date_picker_btn_text">date_picker_btn_text</string>
+    <string name="edit_product_category_text_view_label">Product category</string>
+    <string name="purchase_date_text_view_label">Purchase date</string>
+    <string name="expiry_date_text_view_label">Expiry date</string>
+    <string name="edit_product_note_text_view_label">Additional note</string>
+    <string name="enter_product_note_placeholder">Enter additional note</string>
+    <string name="cancel_btn">Cancel</string>
+    <string name="snap_product_btn_text">Snap product</string>
+    <string name="hint_resource">gosho</string>
+    <string name="select_product_category">Select product category</string>
+    <string name="home_btn">Home</string>
 </resources>

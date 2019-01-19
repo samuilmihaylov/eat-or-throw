@@ -173,7 +173,6 @@ public class TextRecognitionActivity extends FragmentActivity {
             return;
         }
 
-//        StringBuilder recognisedWords = new StringBuilder();
         List<String> dateOptions = new ArrayList<>();
 
         for (int i = 0; i < blocks.size(); i++) {
@@ -183,13 +182,6 @@ public class TextRecognitionActivity extends FragmentActivity {
                 String date = this.parseStringToDate(lines.get(j).getText());
 
                 if (date != null && !dateOptions.contains(date)) {
-//                    recognisedWords.append("LINE: ")
-//                            .append(lines.get(j).getText());
-//                    recognisedWords.append(" | PARSED: ")
-//                            .append(date)
-//                            .append(" ");
-//                    recognisedWords
-//                            .append(System.getProperty("line.separator"));
                     dateOptions.add(date);
                 }
 
@@ -199,23 +191,10 @@ public class TextRecognitionActivity extends FragmentActivity {
                     date = this.parseStringToDate(elements.get(k).getText());
 
                     if (date != null && !dateOptions.contains(date)) {
-//                        recognisedWords
-//                                .append("ELEMENT: ")
-//                                .append(elements.get(k).getText());
-//                        recognisedWords
-//                                .append(" | PARSED: ")
-//                                .append(date)
-//                                .append(" ");
-//                        recognisedWords
-//                                .append(System.getProperty("line.separator"));
                         dateOptions.add(date);
                     }
                 }
-
-//                recognisedWords.append(System.getProperty("line.separator"));
             }
-
-//            recognisedWords.append(System.getProperty("line.separator"));
         }
 
         if (!dateOptions.isEmpty()) {
