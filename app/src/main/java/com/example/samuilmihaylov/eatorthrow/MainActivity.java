@@ -2,47 +2,58 @@ package com.example.samuilmihaylov.eatorthrow;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ImageView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
-import com.example.samuilmihaylov.eatorthrow.Activities.TextRecognitionActivity;
+import com.example.samuilmihaylov.eatorthrow.activities.TextRecognitionActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseApp.initializeApp(MainActivity.this);
         setContentView(R.layout.activity_main);
 
-        ImageView expireDateImageView = (ImageView) Objects.requireNonNull(findViewById(R.id.expiry_date_image));
-        expireDateImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), TextRecognitionActivity.class);
-                startActivity(intent);
-            }
-        });
+        Toolbar myToolbar = findViewById(R.id.action_toolbar);
+        setSupportActionBar(myToolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        FirebaseApp.initializeApp(MainActivity.this);
 
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("message");
 
         myRef.setValue("Hello, World!");
+    }
 
-//        ImageView barcodeImageView = (ImageView) Objects.requireNonNull(findViewById(R.id.barcode_image));
-//        barcodeImageView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(getApplicationContext(), BarcodeRecognitionActivity.class);
-//                startActivity(intent);
-//            }
-//        });
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.action_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
+
+            case R.id.action_add:
+                Intent intent = new Intent(this, TextRecognitionActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 }

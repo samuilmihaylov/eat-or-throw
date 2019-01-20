@@ -1,13 +1,16 @@
-package com.example.samuilmihaylov.eatorthrow.Activities;
+package com.example.samuilmihaylov.eatorthrow.activities;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,11 +19,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import com.example.samuilmihaylov.eatorthrow.Enums.ImageCaptureActionType;
-import com.example.samuilmihaylov.eatorthrow.Enums.MessageType;
-import com.example.samuilmihaylov.eatorthrow.Fragments.DatePickerFragment;
 import com.example.samuilmihaylov.eatorthrow.R;
-import com.example.samuilmihaylov.eatorthrow.Utils.NotificationLogger;
+import com.example.samuilmihaylov.eatorthrow.enums.ImageCaptureActionType;
+import com.example.samuilmihaylov.eatorthrow.enums.MessageType;
+import com.example.samuilmihaylov.eatorthrow.fragments.DatePickerFragment;
+import com.example.samuilmihaylov.eatorthrow.utils.NotificationLogger;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.ml.vision.FirebaseVision;
@@ -38,7 +41,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class TextRecognitionActivity extends FragmentActivity {
+import androidx.annotation.RequiresApi;
+
+public class TextRecognitionActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE_EXPIRE_DATE = 1;
 
@@ -69,11 +74,18 @@ public class TextRecognitionActivity extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_text_recognition);
 
+        Toolbar myToolbar = findViewById(R.id.action_toolbar);
+        setSupportActionBar(myToolbar);
+
+        // Get a support ActionBar corresponding to this toolbar
+        ActionBar ab = getSupportActionBar();
+
+        // Enable the Up button
+        ab.setDisplayHomeAsUpEnabled(true);
+
         mImageView = findViewById(R.id.photo_image_id);
-//        mTextView = findViewById(R.id.edit_text_view_id);
         mSpinner = findViewById(R.id.expire_date_options_id);
 
         ImageButton mSnapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
@@ -90,8 +102,10 @@ public class TextRecognitionActivity extends FragmentActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (imageCaptureActionType == ImageCaptureActionType.EXPIRE_DATE) {
-            if (takePictureIntent.resolveActivity(Objects.requireNonNull(this).getPackageManager()) != null) {
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE_EXPIRE_DATE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (takePictureIntent.resolveActivity(Objects.requireNonNull(this).getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE_EXPIRE_DATE);
+                }
             }
         }
     }
@@ -128,6 +142,7 @@ public class TextRecognitionActivity extends FragmentActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private String parseStringToDate(String dateAsString) {
 
         LocalDate localDate;
@@ -179,7 +194,10 @@ public class TextRecognitionActivity extends FragmentActivity {
             List<FirebaseVisionText.Line> lines = blocks.get(i).getLines();
             for (int j = 0; j < lines.size(); j++) {
 
-                String date = this.parseStringToDate(lines.get(j).getText());
+                String date = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    date = this.parseStringToDate(lines.get(j).getText());
+                }
 
                 if (date != null && !dateOptions.contains(date)) {
                     dateOptions.add(date);
@@ -188,7 +206,9 @@ public class TextRecognitionActivity extends FragmentActivity {
                 List<FirebaseVisionText.Element> elements = lines.get(j).getElements();
                 for (int k = 0; k < elements.size(); k++) {
 
-                    date = this.parseStringToDate(elements.get(k).getText());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        date = this.parseStringToDate(elements.get(k).getText());
+                    }
 
                     if (date != null && !dateOptions.contains(date)) {
                         dateOptions.add(date);
@@ -199,7 +219,10 @@ public class TextRecognitionActivity extends FragmentActivity {
 
         if (!dateOptions.isEmpty()) {
             // Create an ArrayAdapter using the string array and a default spinner layout
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(this), android.R.layout.simple_spinner_item, dateOptions);
+            ArrayAdapter<String> adapter = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                adapter = new ArrayAdapter<>(Objects.requireNonNull(this), android.R.layout.simple_spinner_item, dateOptions);
+            }
             // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             // Apply the adapter to the spinner

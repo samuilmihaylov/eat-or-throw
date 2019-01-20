@@ -1,4 +1,4 @@
-package com.example.samuilmihaylov.eatorthrow.Fragments;
+package com.example.samuilmihaylov.eatorthrow.fragments;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

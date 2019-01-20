@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10sp"
-    tools:context=".Activities.TextRecognitionActivity">
+    tools:context=".activities.TextRecognitionActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/action_toolbar"
+        android:layout_width="424dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <ImageButton
         android:id="@+id/snap_product_btn_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/action_toolbar"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="-50dp"
+        android:background="@null"
         android:contentDescription="@string/snap_product_btn_text"
         android:src="@drawable/ic_round_photo_camera_24px" />
 
@@ -19,6 +30,7 @@
         android:id="@+id/photo_image_id"
         android:layout_width="270dp"
         android:layout_height="130dp"
+        android:layout_below="@+id/action_toolbar"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
@@ -36,6 +48,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/photo_image_id"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:paddingTop="20dp"
         android:text="@string/edit_product_name_text_view_label"
         android:textStyle="bold" />
@@ -45,37 +59,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_product_name_text_label_id"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
         android:hint="@string/enter_product_name_placeholder"
         android:importantForAutofill="no"
         android:inputType="text"
         android:textStyle="italic" />
-
-    <!--<TextView-->
-    <!--android:id="@+id/edit_product_type_text_label_id"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_below="@+id/edit_product_name_text_id"-->
-    <!--android:paddingTop="20dp"-->
-    <!--android:text="@string/edit_product_category_text_view_label"-->
-    <!--android:textStyle="bold" />-->
-
-    <!--<EditText-->
-    <!--android:id="@+id/edit_product_type_text_id"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_below="@+id/edit_product_type_text_label_id"-->
-    <!--android:layout_centerHorizontal="true"-->
-    <!--android:hint="@string/enter_product_category_placeholder"-->
-    <!--android:importantForAutofill="no"-->
-    <!--android:inputType="text"-->
-    <!--android:textStyle="italic" />-->
 
     <RelativeLayout
         android:id="@+id/edit_product_type_text_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_product_name_text_id"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="20dp">
 
         <TextView
@@ -99,7 +98,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_product_type_text_id"
-        android:layout_alignStart="@+id/from_date_id"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="20dp"
         android:text="@string/purchase_date_text_view_label"
         android:textStyle="bold" />
@@ -109,8 +109,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/purchase_date_label"
-        android:layout_alignParentStart="true"
-        android:hint="@string/enter_expire_date_or_snapshot_it_placeholder"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:hint="@string/enter_purchase_date_or_snapshot_it_placeholder"
         android:importantForAutofill="no"
         android:inputType="date"
         android:textStyle="italic" />
@@ -120,7 +121,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/from_date_id"
-        android:layout_alignStart="@+id/to_date_id"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="20dp"
         android:text="@string/expiry_date_text_view_label"
         android:textStyle="bold" />
@@ -130,7 +132,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/expiry_date_label"
-        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:hint="@string/enter_expire_date_or_snapshot_it_placeholder"
         android:importantForAutofill="no"
         android:inputType="date"
@@ -141,40 +144,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/from_date_id"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_toEndOf="@+id/from_date_id"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="50dp"
+        android:layout_toEndOf="@+id/to_date_id"
+        android:layout_toRightOf="@+id/to_date_id"
+        android:background="@null"
         android:contentDescription="@string/snap_expire_date_btn_text"
         android:src="@drawable/ic_round_photo_camera_24px" />
-
-    <!--<TextView-->
-    <!--android:id="@+id/expire_date_options_label_id"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_below="@+id/from_date_id"-->
-    <!--android:layout_marginStart="20dp"-->
-    <!--android:layout_marginTop="30dp"-->
-    <!--android:layout_toEndOf="@+id/snap_expire_date_btn_id"-->
-    <!--android:text="@string/recognized_date_options_label"-->
-    <!--android:textStyle="italic" />-->
-
-    <!--<Spinner-->
-    <!--android:id="@+id/expire_date_options_id"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_below="@+id/expire_date_options_label_id"-->
-    <!--android:layout_alignBaseline="@+id/expire_date_options_label_id"-->
-    <!--android:layout_alignEnd="@+id/expire_date_options_label_id"-->
-    <!--android:spinnerMode="dropdown" />-->
-
 
     <RelativeLayout
         android:id="@+id/expire_date_options_label_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/from_date_id"
-        android:layout_marginTop="20dp"
-        android:layout_toEndOf="@id/snap_expire_date_btn_id">
+        android:layout_below="@+id/to_date_id"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp">
 
         <Spinner
             android:id="@+id/expire_date_options_id"
@@ -194,7 +180,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/expire_date_options_label_id"
-        android:layout_marginTop="60dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="40dp"
         android:text="@string/edit_product_note_text_view_label"
         android:textStyle="bold" />
 
@@ -203,32 +191,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_product_note_text_label_id"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
         android:hint="@string/enter_product_note_placeholder"
         android:importantForAutofill="no"
         android:inputType="text"
         android:textStyle="italic" />
 
-    <Button
-        android:id="@+id/cancel_btn_id"
-        android:layout_width="70dp"
-        android:layout_height="35dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:alpha=".90"
-        android:background="#FF7474"
-        android:text="@string/home_btn" />
+    <!--<Button-->
+    <!--android:id="@+id/cancel_btn_id"-->
+    <!--android:layout_width="70dp"-->
+    <!--android:layout_height="35dp"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_marginStart="10dp"-->
+    <!--android:layout_marginLeft="10dp"-->
+    <!--android:layout_marginRight="10dp"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:alpha=".85"-->
+    <!--android:background="@drawable/button_background_with_radius_red"-->
+    <!--android:text="@string/home_btn" />-->
 
-    <Button
-        android:id="@+id/save_btn_id"
-        android:layout_width="70dp"
-        android:layout_height="35dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:alpha=".90"
-        android:background="#50DD8E"
-        android:text="@string/save_btn" />
+    <!--<Button-->
+    <!--android:id="@+id/save_btn_id"-->
+    <!--android:layout_width="70dp"-->
+    <!--android:layout_height="35dp"-->
+    <!--android:layout_alignParentEnd="true"-->
+    <!--android:layout_alignParentRight="true"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_marginEnd="10dp"-->
+    <!--android:layout_marginRight="10dp"-->
+    <!--android:layout_marginBottom="10dp"-->
+    <!--android:alpha=".85"-->
+    <!--android:background="@drawable/button_background_with_radius_green"-->
+    <!--android:text="@string/save_btn" />-->
 
 </RelativeLayout>

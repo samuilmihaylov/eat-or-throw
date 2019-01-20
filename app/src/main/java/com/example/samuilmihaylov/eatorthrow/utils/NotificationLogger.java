@@ -1,4 +1,4 @@
-package com.example.samuilmihaylov.eatorthrow.Utils;
+package com.example.samuilmihaylov.eatorthrow.utils;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -6,7 +6,7 @@ import android.graphics.PorterDuff;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.samuilmihaylov.eatorthrow.Enums.MessageType;
+import com.example.samuilmihaylov.eatorthrow.enums.MessageType;
 
 public class NotificationLogger {
 
