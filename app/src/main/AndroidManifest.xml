@@ -23,10 +23,6 @@
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="text, ocr, barcode" />
 
-        <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.example.samuilmihaylov.eatorthrow.MainActivity" />
-
         <activity
             android:name=".MainActivity"
             android:parentActivityName="com.example.samuilmihaylov.eatorthrow.MainActivity">
@@ -37,7 +33,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.TextRecognitionActivity" />
+        <activity
+            android:name=".activities.AddProductActivity"
+            android:parentActivityName="com.example.samuilmihaylov.eatorthrow.MainActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.samuilmihaylov.eatorthrow.MainActivity" />
+        </activity>
 
     </application>
 

@@ -1,5 +1,6 @@
 package com.example.samuilmihaylov.eatorthrow.enums;
 
 public enum ImageCaptureActionType {
-    BARCODE, EXPIRE_DATE
+    REQUEST_IMAGE_CAPTURE_PRODUCT,
+    REQUEST_IMAGE_CAPTURE_EXPIRE_DATE
 }
