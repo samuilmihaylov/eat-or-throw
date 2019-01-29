@@ -24,9 +24,21 @@
             android:value="text, ocr, barcode" />
 
         <activity
-            android:name=".MainActivity"
-            android:parentActivityName="com.example.samuilmihaylov.eatorthrow.MainActivity">
+            android:name=".activities.MainActivity"
+            android:parentActivityName=".activities.MainActivity" />
 
+        <activity
+            android:name=".activities.AddProductActivity"
+            android:parentActivityName=".activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.samuilmihaylov.eatorthrow.activities.MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".activities.MainEmptyActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,13 +46,8 @@
         </activity>
 
         <activity
-            android:name=".activities.AddProductActivity"
-            android:parentActivityName="com.example.samuilmihaylov.eatorthrow.MainActivity">
-
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.samuilmihaylov.eatorthrow.MainActivity" />
-        </activity>
+            android:name=".activities.LoginActivity"
+            android:label="@string/title_activity_login" />
 
     </application>
 

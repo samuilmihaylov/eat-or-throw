@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/add_product_wrapper"
+    android:id="@+id/add_product_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.AddProductActivity">
@@ -12,6 +12,8 @@
         android:layout_width="424dp"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
+        android:paddingEnd="10dp"
+        android:paddingRight="10dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -115,9 +117,9 @@
         android:layout_below="@+id/purchase_date_label"
         android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
+        android:focusable="false"
         android:hint="@string/enter_purchase_date_or_snapshot_it_placeholder"
         android:importantForAutofill="no"
-        android:focusable="false"
         android:inputType="date"
         android:textStyle="italic" />
 
@@ -139,10 +141,10 @@
         android:layout_below="@+id/expiry_date_label"
         android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
+        android:focusable="false"
         android:hint="@string/enter_expire_date_or_snapshot_it_placeholder"
         android:importantForAutofill="no"
         android:inputType="date"
-        android:focusable="false"
         android:textStyle="italic" />
 
     <ImageButton
@@ -174,6 +176,7 @@
             android:id="@+id/expire_date_options_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="30dp"
             android:spinnerMode="dropdown" />
 
         <TextView

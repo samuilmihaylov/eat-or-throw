@@ -8,6 +8,10 @@ public class Product {
     private String expiryDate;
     private String additionalNote;
 
+    public Product() {
+
+    }
+
     public Product(String productName, String productCategory, String purchaseDate, String expiryDate, String additionalNote) {
         this.productName = productName;
         this.productCategory = productCategory;

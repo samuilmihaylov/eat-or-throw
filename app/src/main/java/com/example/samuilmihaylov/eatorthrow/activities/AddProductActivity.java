@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -216,16 +218,22 @@ public class AddProductActivity extends AppCompatActivity {
         Product product = new Product(productName, productCategory, mPurchaseDate, mExpiryDate, additionalNote);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("products");
+        DatabaseReference databaseReference = database.getReference("products");
 
-        myRef.push().setValue(product, new DatabaseReference.CompletionListener() {
+        databaseReference.push().setValue(product, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 if (databaseError != null) {
-                    NotificationLogger.showToast(getApplicationContext(), "Product could not be saved", MessageType.ERROR);
+//                    NotificationLogger.showToast(getApplicationContext(), "Product could not be saved", MessageType.ERROR);
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product could not be saved", Snackbar.LENGTH_SHORT);
+                    snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+                    snackbar.show();
                 } else {
                     clearTextView();
-                    NotificationLogger.showToast(getApplicationContext(), "Product saved", MessageType.SUCCESS);
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
+                    snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+                    snackbar.show();
+//                    NotificationLogger.showToast(getApplicationContext(), "Product saved", MessageType.SUCCESS);
                 }
             }
         });
@@ -347,6 +355,9 @@ public class AddProductActivity extends AppCompatActivity {
 
                 if (date != null && !dateOptions.contains(date)) {
                     dateOptions.add(date);
+                    mExpiryDateEditTextView.setText(date);
+
+                    // TODO: Update datepicker
                 }
 
                 List<FirebaseVisionText.Element> elements = lines.get(j).getElements();
@@ -358,20 +369,22 @@ public class AddProductActivity extends AppCompatActivity {
 
                     if (date != null && !dateOptions.contains(date)) {
                         dateOptions.add(date);
+                        mExpiryDateEditTextView.setText(date);
+
+                        // TODO: Update datepicker
                     }
                 }
             }
         }
 
-        if (!dateOptions.isEmpty()) {
+        if (dateOptions.size() > 1) {
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dateOptions);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mRecognizedDateOptionsSpinner.setAdapter(adapter);
+            mSelectedAlternativeDateTextView.setText(dateOptions.get(0));
+        }
 
-            if (dateOptions.size() == 1) {
-                mSelectedAlternativeDateTextView.setText(dateOptions.get(0));
-            }
-        } else {
+        if (dateOptions.isEmpty()) {
             NotificationLogger.showToast(getApplicationContext(), "Unsuccessful recognition of the expire date", MessageType.ERROR);
         }
     }
@@ -397,7 +410,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void clearTextView() {
-        ViewGroup group = findViewById(R.id.add_product_wrapper);
+        ViewGroup group = findViewById(R.id.add_product_layout);
         for (int i = 0, count = group.getChildCount(); i < count; ++i) {
             View view = group.getChildAt(i);
             if (view instanceof EditText) {
