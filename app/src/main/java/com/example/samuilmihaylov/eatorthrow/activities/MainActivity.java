@@ -1,6 +1,7 @@
 package com.example.samuilmihaylov.eatorthrow.activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +14,11 @@ import android.view.MenuItem;
 import com.example.samuilmihaylov.eatorthrow.R;
 import com.example.samuilmihaylov.eatorthrow.adapters.ProductsRecycleViewAdapter;
 import com.example.samuilmihaylov.eatorthrow.models.Product;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,9 +26,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
+import androidx.annotation.RequiresApi;
 
 public class MainActivity extends AppCompatActivity {
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,21 +43,15 @@ public class MainActivity extends AppCompatActivity {
 
         final RecyclerView mRecyclerView = findViewById(R.id.my_recycler_view);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
-//                mLayoutManager.getOrientation());
-//        mRecyclerView.addItemDecoration(dividerItemDecoration);
 
         FirebaseApp.initializeApp(MainActivity.this);
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = database.getReference("products");
+        DatabaseReference databaseReference = database.getReference("products").child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()));
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -66,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 System.out.println("The read failed: " + databaseError.getCode());
             }
         });
@@ -80,15 +83,36 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        Intent intent;
+
         switch (item.getItemId()) {
             case R.id.action_settings:
                 return true;
 
             case R.id.action_add_new_product:
-                Intent intent = new Intent(this, AddProductActivity.class);
+                intent = new Intent(this, AddProductActivity.class);
                 startActivity(intent);
+                return true;
+
+            case R.id.log_out:
+                GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build();
+
+                GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
+                FirebaseAuth.getInstance().signOut();
+                mGoogleSignInClient.signOut();
+
+                if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                    intent = new Intent(this, LoginActivity.class);
+                    startActivity(intent);
+                }
+
                 return true;
 
             default:

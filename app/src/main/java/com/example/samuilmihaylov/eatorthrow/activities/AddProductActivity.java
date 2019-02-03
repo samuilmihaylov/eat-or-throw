@@ -32,8 +32,12 @@ import com.example.samuilmihaylov.eatorthrow.enums.ImageCaptureActionType;
 import com.example.samuilmihaylov.eatorthrow.enums.MessageType;
 import com.example.samuilmihaylov.eatorthrow.models.Product;
 import com.example.samuilmihaylov.eatorthrow.utils.NotificationLogger;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -41,7 +45,11 @@ import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -51,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.RequiresApi;
 
@@ -82,6 +91,7 @@ public class AddProductActivity extends AppCompatActivity {
     private EditText mExpiryDateEditTextView;
     private Spinner mRecognizedDateOptionsSpinner;
     private Spinner mProductCategoryOptionsSpinner;
+    private Bitmap mProductImageBitmap;
 
     public AddProductActivity() {
         // Required empty public constructor
@@ -189,6 +199,7 @@ public class AddProductActivity extends AppCompatActivity {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -197,46 +208,108 @@ public class AddProductActivity extends AppCompatActivity {
                 this.saveProduct();
                 return true;
 
+            case R.id.log_out:
+                GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build();
+
+                GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
+                FirebaseAuth.getInstance().signOut();
+                mGoogleSignInClient.signOut();
+
+                if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivity(intent);
+                }
+
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
 
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void saveProduct() {
 
         EditText editProductNameView = findViewById(R.id.edit_product_name_text_id);
         EditText editAdditionalNoteView = findViewById(R.id.product_note_text_id);
 
-        String productName = editProductNameView.getText().toString();
-        String productCategory = mProductCategoryOptionsSpinner.getSelectedItem().toString();
+        final String productName = editProductNameView.getText().toString();
+        final String productCategory = mProductCategoryOptionsSpinner.getSelectedItem().toString();
 //        String recognizedExpiryDateAlternative = mRecognizedDateOptionsSpinner.getSelectedItem().toString();
-        String additionalNote = editAdditionalNoteView.getText().toString();
+        final String additionalNote = editAdditionalNoteView.getText().toString();
 
         // TODO: Check if alternative date is chosen
 
-        Product product = new Product(productName, productCategory, mPurchaseDate, mExpiryDate, additionalNote);
-
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = database.getReference("products");
+        final DatabaseReference databaseReference = database.getReference("products").child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()));
+        final String key = databaseReference.push().getKey();
 
-        databaseReference.push().setValue(product, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                if (databaseError != null) {
-//                    NotificationLogger.showToast(getApplicationContext(), "Product could not be saved", MessageType.ERROR);
-                    Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product could not be saved", Snackbar.LENGTH_SHORT);
-                    snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
-                    snackbar.show();
-                } else {
-                    clearTextView();
-                    Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
-                    snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
-                    snackbar.show();
-//                    NotificationLogger.showToast(getApplicationContext(), "Product saved", MessageType.SUCCESS);
-                }
+        if (key != null) {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+
+            if (mProductImageBitmap != null) {
+                final StorageReference storageRef = storage.getReference("products").child(FirebaseAuth.getInstance().getUid()).child(key + ".jpg");
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                mProductImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                byte[] data = byteArrayOutputStream.toByteArray();
+
+                UploadTask uploadTask = storageRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // TODO: Handle this case
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        Product product = new Product(key, productName, productCategory, mPurchaseDate, mExpiryDate, additionalNote, storageRef.getPath());
+
+                        databaseReference.child(key).setValue(product, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                                if (databaseError != null) {
+                                    Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product could not be saved", Snackbar.LENGTH_SHORT);
+                                    snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+                                    snackbar.show();
+                                } else {
+                                    clearTextView();
+                                    Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
+                                    snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+                                    snackbar.show();
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+
+                Product product = new Product(key, productName, productCategory, mPurchaseDate, mExpiryDate, additionalNote, null);
+
+                databaseReference.child(key).setValue(product, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+
+                        if (databaseError != null) {
+                            Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product could not be saved", Snackbar.LENGTH_SHORT);
+                            snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+                            snackbar.show();
+                        } else {
+                            clearTextView();
+                            Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
+                            snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+                            snackbar.show();
+                        }
+                    }
+                });
             }
-        });
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -260,12 +333,12 @@ public class AddProductActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE_PRODUCT && resultCode == Activity.RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = null;
+            mProductImageBitmap = null;
             if (extras != null) {
-                imageBitmap = (Bitmap) extras.get("data");
+                mProductImageBitmap = (Bitmap) extras.get("data");
             }
 
-            mProductPhotoImage.setImageBitmap(imageBitmap);
+            mProductPhotoImage.setImageBitmap(mProductImageBitmap);
             mProductPhotoImage.setImageAlpha(255);
 
         } else if (requestCode == REQUEST_IMAGE_CAPTURE_EXPIRE_DATE && resultCode == Activity.RESULT_OK) {

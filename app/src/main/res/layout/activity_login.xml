@@ -31,44 +31,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/action_toolbar"
+        android:layout_marginTop="110dp"
         android:gravity="center"
         android:orientation="vertical">
 
-        <android.support.design.widget.TextInputLayout
+        <EditText
+            android:id="@+id/input_email"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_email"
+            android:importantForAutofill="no"
+            android:inputType="textEmailAddress"
+            android:textColor="@android:color/black"
+            android:textStyle="italic"
+            tools:targetApi="o" />
 
-            <EditText
-                android:id="@+id/input_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint_email"
-                android:importantForAutofill="no"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                tools:targetApi="o" />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
+        <EditText
+            android:id="@+id/input_password"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/input_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:focusableInTouchMode="true"
-                android:hint="@string/hint_password"
-                android:imeOptions="actionUnspecified"
-                android:importantForAutofill="no"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                tools:targetApi="o" />
-
-        </android.support.design.widget.TextInputLayout>
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_password"
+            android:importantForAutofill="no"
+            android:inputType="textPassword"
+            android:textColor="@android:color/black"
+            android:textStyle="italic"
+            tools:targetApi="o" />
 
         <Button
             android:id="@+id/btn_sign_in"

@@ -55,6 +55,7 @@ public class LoginActivity extends AppCompatActivity {
         mPasswordField = findViewById(R.id.input_password);
 
         mProgressBar = findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.GONE);
         mContainer = findViewById(R.id.login_layout);
 
         findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
@@ -155,9 +156,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d("Login", "firebaseAuthWithGoogle:" + acct.getId());
-
         showProgressDialog();
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -172,7 +171,6 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                         hideProgressDialog();
-
                     }
                 });
     }

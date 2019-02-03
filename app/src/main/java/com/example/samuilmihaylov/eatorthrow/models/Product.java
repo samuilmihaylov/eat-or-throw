@@ -2,22 +2,26 @@ package com.example.samuilmihaylov.eatorthrow.models;
 
 public class Product {
 
+    private String id;
     private String productName;
     private String productCategory;
     private String purchaseDate;
     private String expiryDate;
     private String additionalNote;
+    private String productImageUrl;
 
     public Product() {
 
     }
 
-    public Product(String productName, String productCategory, String purchaseDate, String expiryDate, String additionalNote) {
+    public Product(String id, String productName, String productCategory, String purchaseDate, String expiryDate, String additionalNote, String productImageUrl) {
+        this.id = id;
         this.productName = productName;
         this.productCategory = productCategory;
         this.purchaseDate = purchaseDate;
         this.expiryDate = expiryDate;
         this.additionalNote = additionalNote;
+        this.productImageUrl = productImageUrl;
     }
 
     public String getProductName() {
@@ -58,5 +62,21 @@ public class Product {
 
     public void setAdditionalNote(String additionalNote) {
         this.additionalNote = additionalNote;
+    }
+
+    public String getProductImageUrl() {
+        return productImageUrl;
+    }
+
+    public void setProductImageUrl(String productImageUrl) {
+        this.productImageUrl = productImageUrl;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
