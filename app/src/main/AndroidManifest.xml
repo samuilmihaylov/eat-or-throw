@@ -49,6 +49,8 @@
             android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login" />
 
+        <receiver android:name=".notifications.NotificationPublisher" />
+
     </application>
 
 </manifest>

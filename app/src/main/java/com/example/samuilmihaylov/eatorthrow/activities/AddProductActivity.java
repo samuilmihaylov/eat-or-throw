@@ -1,12 +1,19 @@
 package com.example.samuilmihaylov.eatorthrow.activities;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,6 +42,7 @@ import com.example.samuilmihaylov.eatorthrow.R;
 import com.example.samuilmihaylov.eatorthrow.enums.ImageCaptureActionType;
 import com.example.samuilmihaylov.eatorthrow.enums.MessageType;
 import com.example.samuilmihaylov.eatorthrow.models.Product;
+import com.example.samuilmihaylov.eatorthrow.notifications.NotificationPublisher;
 import com.example.samuilmihaylov.eatorthrow.utils.NotificationLogger;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -331,6 +339,9 @@ public class AddProductActivity extends AppCompatActivity {
                                     clearTextView();
                                     Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
                                     snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+
+                                    scheduleNotification(getNotification("test"), 2000);
+
                                     snackbar.show();
                                 }
                             }
@@ -353,6 +364,9 @@ public class AddProductActivity extends AppCompatActivity {
                             clearTextView();
                             Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
                             snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+
+                            scheduleNotification(getNotification("test"), 2000);
+
                             snackbar.show();
                         }
                     }
@@ -531,6 +545,40 @@ public class AddProductActivity extends AppCompatActivity {
         mProductCategoryOptionsSpinner.setAdapter(adapter);
     }
 
+    private void scheduleNotification(Notification notification, long delay) {
+
+        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+    }
+
+    private Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Scheduled Notification");
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.ic_launcher_background);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            NotificationManager notificationManager =
+                    (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            String channelId = "YOUR_CHANNEL_ID";
+            NotificationChannel channel = new NotificationChannel(channelId,
+                    "Channel human readable title",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+            builder.setChannelId(channelId);
+        }
+
+        return builder.build();
+    }
+
     private void clearTextView() {
         ViewGroup group = findViewById(R.id.add_product_layout);
         for (int i = 0, count = group.getChildCount(); i < count; ++i) {
@@ -540,5 +588,5 @@ public class AddProductActivity extends AppCompatActivity {
             }
         }
     }
-    
+
 }
