@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,6 +15,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -92,6 +96,11 @@ public class AddProductActivity extends AppCompatActivity {
     private Spinner mRecognizedDateOptionsSpinner;
     private Spinner mProductCategoryOptionsSpinner;
     private Bitmap mProductImageBitmap;
+    private String mProductName;
+    private String mProductCategory;
+    private String mAdditionalNote;
+    private EditText mEditProductNameView;
+    private EditText mEditAdditionalNoteView;
 
     public AddProductActivity() {
         // Required empty public constructor
@@ -111,10 +120,18 @@ public class AddProductActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        mEditProductNameView = findViewById(R.id.edit_product_name_text_id);
+        mEditAdditionalNoteView = findViewById(R.id.product_note_text_id);
         mProductPhotoImage = findViewById(R.id.product_photo_image_id);
         mSelectedAlternativeDateTextView = findViewById(R.id.to_date_alternative_id);
         mRecognizedDateOptionsSpinner = findViewById(R.id.expire_date_options_id);
         mProductCategoryOptionsSpinner = findViewById(R.id.product_categories_options_id);
+
+        TextView productNameLabelView = findViewById(R.id.edit_product_name_text_label_id);
+        this.setColor(productNameLabelView, productNameLabelView.getText().toString(), "*");
+
+        TextView productCategoryLabelView = findViewById(R.id.product_category_text_label);
+        this.setColor(productCategoryLabelView, productCategoryLabelView.getText().toString(), "*");
 
         this.initializeProductCategories();
 
@@ -141,6 +158,10 @@ public class AddProductActivity extends AppCompatActivity {
         final DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter();
 
         mPurchaseDateEditTextView = findViewById(R.id.from_date_id);
+        mPurchaseDate = LocalDate.now().format(formatter);
+        mPurchaseDateEditTextView.setText(mPurchaseDate);
+        TextView purchaseDateLabelView = findViewById(R.id.purchase_date_label);
+        this.setColor(purchaseDateLabelView, purchaseDateLabelView.getText().toString(), "*");
         final DatePickerDialog.OnDateSetListener purchaseDate = new DatePickerDialog.OnDateSetListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -166,6 +187,8 @@ public class AddProductActivity extends AppCompatActivity {
         });
 
         mExpiryDateEditTextView = findViewById(R.id.to_date_id);
+        TextView expiryDateLabelView = findViewById(R.id.expiry_date_label);
+        this.setColor(expiryDateLabelView, expiryDateLabelView.getText().toString(), "*");
         final DatePickerDialog.OnDateSetListener expiryDate = new DatePickerDialog.OnDateSetListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -184,9 +207,13 @@ public class AddProductActivity extends AppCompatActivity {
         mExpiryDateEditTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new DatePickerDialog(AddProductActivity.this, expiryDate, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+                DatePickerDialog expiryDatePickerDialog = new DatePickerDialog(AddProductActivity.this, expiryDate,
+                        myCalendar.get(Calendar.YEAR),
+                        myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH));
+
+                expiryDatePickerDialog.getDatePicker().setMinDate(myCalendar.getTimeInMillis());
+                expiryDatePickerDialog.show();
             }
         });
     }
@@ -205,7 +232,30 @@ public class AddProductActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.action_save_product:
-                this.saveProduct();
+                mProductName = mEditProductNameView.getText().toString().trim();
+                mProductCategory = mProductCategoryOptionsSpinner.getSelectedItem().toString().trim();
+//        String recognizedExpiryDateAlternative = mRecognizedDateOptionsSpinner.getSelectedItem().toString();
+                mAdditionalNote = mEditAdditionalNoteView.getText().toString().trim();
+
+                boolean isValid = true;
+
+                if (TextUtils.isEmpty(mProductName)) {
+                    mEditProductNameView.setError("Product name is required");
+                    isValid = false;
+                }
+                if (TextUtils.isEmpty(mPurchaseDate)) {
+                    mPurchaseDateEditTextView.setError("Purchase date is required");
+                    isValid = false;
+                }
+                if (TextUtils.isEmpty(mExpiryDate)) {
+                    mExpiryDateEditTextView.setError("Expiry date is required");
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    this.saveProduct();
+                }
+
                 return true;
 
             case R.id.log_out:
@@ -231,16 +281,15 @@ public class AddProductActivity extends AppCompatActivity {
         }
     }
 
+    private void setColor(TextView view, String fulltext, String subtext) {
+        view.setText(fulltext, TextView.BufferType.SPANNABLE);
+        Spannable str = (Spannable) view.getText();
+        int i = fulltext.indexOf(subtext);
+        str.setSpan(new ForegroundColorSpan(Color.RED), i, i + subtext.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void saveProduct() {
-
-        EditText editProductNameView = findViewById(R.id.edit_product_name_text_id);
-        EditText editAdditionalNoteView = findViewById(R.id.product_note_text_id);
-
-        final String productName = editProductNameView.getText().toString();
-        final String productCategory = mProductCategoryOptionsSpinner.getSelectedItem().toString();
-//        String recognizedExpiryDateAlternative = mRecognizedDateOptionsSpinner.getSelectedItem().toString();
-        final String additionalNote = editAdditionalNoteView.getText().toString();
 
         // TODO: Check if alternative date is chosen
 
@@ -268,7 +317,7 @@ public class AddProductActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                        Product product = new Product(key, productName, productCategory, mPurchaseDate, mExpiryDate, additionalNote, storageRef.getPath());
+                        Product product = new Product(key, mProductName, mProductCategory, mPurchaseDate, mExpiryDate, mAdditionalNote, storageRef.getPath());
 
                         databaseReference.child(key).setValue(product, new DatabaseReference.CompletionListener() {
                             @Override
@@ -290,7 +339,7 @@ public class AddProductActivity extends AppCompatActivity {
                 });
             } else {
 
-                Product product = new Product(key, productName, productCategory, mPurchaseDate, mExpiryDate, additionalNote, null);
+                Product product = new Product(key, mProductName, mProductCategory, mPurchaseDate, mExpiryDate, mAdditionalNote, null);
 
                 databaseReference.child(key).setValue(product, new DatabaseReference.CompletionListener() {
                     @Override
@@ -491,4 +540,5 @@ public class AddProductActivity extends AppCompatActivity {
             }
         }
     }
+    
 }
