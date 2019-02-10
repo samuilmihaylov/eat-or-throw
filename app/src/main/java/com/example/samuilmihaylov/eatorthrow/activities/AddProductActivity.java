@@ -1,5 +1,6 @@
 package com.example.samuilmihaylov.eatorthrow.activities;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
@@ -11,9 +12,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.icu.text.SimpleDateFormat;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -38,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.samuilmihaylov.eatorthrow.R;
 import com.example.samuilmihaylov.eatorthrow.enums.ImageCaptureActionType;
 import com.example.samuilmihaylov.eatorthrow.enums.MessageType;
@@ -62,6 +65,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -70,6 +74,7 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,8 +100,11 @@ public class AddProductActivity extends AppCompatActivity {
             "dd.MM.yyyy",
             "dd MM yyyy",
             "ddMMyyyy");
-    String mPurchaseDate;
-    String mExpiryDate;
+
+    private Date mPurchaseDate;
+    private Date mExpiryDate;
+    private String mPurchaseDateAsString;
+    private String mExpiryDateAsString;
     private ImageView mProductPhotoImage;
     private TextView mSelectedAlternativeDateTextView;
     private EditText mPurchaseDateEditTextView;
@@ -109,6 +117,10 @@ public class AddProductActivity extends AppCompatActivity {
     private String mAdditionalNote;
     private EditText mEditProductNameView;
     private EditText mEditAdditionalNoteView;
+    private DateTimeFormatter mFormatter;
+    private FirebaseDatabase mDatabase;
+    private FirebaseStorage mStorage;
+    private Product mProductToEdit;
 
     public AddProductActivity() {
         // Required empty public constructor
@@ -120,6 +132,9 @@ public class AddProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_product);
 
+        mDatabase = FirebaseDatabase.getInstance();
+        mStorage = FirebaseStorage.getInstance();
+
         Toolbar myToolbar = findViewById(R.id.action_toolbar);
         setSupportActionBar(myToolbar);
 
@@ -128,18 +143,74 @@ public class AddProductActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        TextView productNameLabelView = findViewById(R.id.edit_product_name_text_label_id);
+        this.setColor(productNameLabelView, productNameLabelView.getText().toString(), "*");
+
+        TextView productCategoryLabelView = findViewById(R.id.product_category_text_label);
+        this.setColor(productCategoryLabelView, productCategoryLabelView.getText().toString(), "*");
+
+        TextView purchaseDateLabelView = findViewById(R.id.purchase_date_label);
+        this.setColor(purchaseDateLabelView, purchaseDateLabelView.getText().toString(), "*");
+
+        TextView expiryDateLabelView = findViewById(R.id.expiry_date_label);
+        this.setColor(expiryDateLabelView, expiryDateLabelView.getText().toString(), "*");
+
         mEditProductNameView = findViewById(R.id.edit_product_name_text_id);
         mEditAdditionalNoteView = findViewById(R.id.product_note_text_id);
         mProductPhotoImage = findViewById(R.id.product_photo_image_id);
         mSelectedAlternativeDateTextView = findViewById(R.id.to_date_alternative_id);
         mRecognizedDateOptionsSpinner = findViewById(R.id.expire_date_options_id);
         mProductCategoryOptionsSpinner = findViewById(R.id.product_categories_options_id);
+        mPurchaseDateEditTextView = findViewById(R.id.from_date_id);
+        mExpiryDateEditTextView = findViewById(R.id.to_date_id);
 
-        TextView productNameLabelView = findViewById(R.id.edit_product_name_text_label_id);
-        this.setColor(productNameLabelView, productNameLabelView.getText().toString(), "*");
+        final Calendar myCalendar = Calendar.getInstance();
+        mFormatter = new DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter();
 
-        TextView productCategoryLabelView = findViewById(R.id.product_category_text_label);
-        this.setColor(productCategoryLabelView, productCategoryLabelView.getText().toString(), "*");
+        Product product = (Product) getIntent().getSerializableExtra("product");
+
+        if (product != null) {
+
+            mProductToEdit = product;
+
+            mEditProductNameView.setText(product.getProductName());
+            mEditAdditionalNoteView.setText(product.getAdditionalNote());
+            mPurchaseDateEditTextView.setText(product.getPurchaseDate());
+            mExpiryDateEditTextView.setText(product.getExpiryDate());
+
+            mProductName = product.getProductName();
+            mPurchaseDateAsString = product.getPurchaseDate();
+            mExpiryDateAsString = product.getExpiryDate();
+            mAdditionalNote = product.getAdditionalNote();
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            try {
+                mPurchaseDate = simpleDateFormat.parse(product.getPurchaseDate());
+                mExpiryDate = simpleDateFormat.parse(product.getExpiryDate());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            if (product.getProductImageUrl() != null) {
+                final StorageReference storageRef = mStorage.getReference();
+                storageRef.child(product.getProductImageUrl()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        String imageURL = uri.toString();
+                        Glide.with(getApplicationContext()).load(imageURL).into(mProductPhotoImage);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Log.e("Product Image load", "Could not load the product image from firebase storage");
+                    }
+                });
+            }
+        } else {
+            mPurchaseDate = myCalendar.getTime();
+            mPurchaseDateAsString = LocalDate.now().format(mFormatter);
+            mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
+        }
 
         this.initializeProductCategories();
 
@@ -162,14 +233,6 @@ public class AddProductActivity extends AppCompatActivity {
             }
         });
 
-        final Calendar myCalendar = Calendar.getInstance();
-        final DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter();
-
-        mPurchaseDateEditTextView = findViewById(R.id.from_date_id);
-        mPurchaseDate = LocalDate.now().format(formatter);
-        mPurchaseDateEditTextView.setText(mPurchaseDate);
-        TextView purchaseDateLabelView = findViewById(R.id.purchase_date_label);
-        this.setColor(purchaseDateLabelView, purchaseDateLabelView.getText().toString(), "*");
         final DatePickerDialog.OnDateSetListener purchaseDate = new DatePickerDialog.OnDateSetListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -179,24 +242,23 @@ public class AddProductActivity extends AppCompatActivity {
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                mPurchaseDate = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(formatter);
+                mPurchaseDate = myCalendar.getTime();
+                mPurchaseDateAsString = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(mFormatter);
 
-                mPurchaseDateEditTextView.setText(mPurchaseDate);
+                mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
             }
         };
 
         mPurchaseDateEditTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new DatePickerDialog(AddProductActivity.this, purchaseDate, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                new DatePickerDialog(AddProductActivity.this, purchaseDate,
+                        myCalendar.get(Calendar.YEAR),
+                        myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
 
-        mExpiryDateEditTextView = findViewById(R.id.to_date_id);
-        TextView expiryDateLabelView = findViewById(R.id.expiry_date_label);
-        this.setColor(expiryDateLabelView, expiryDateLabelView.getText().toString(), "*");
         final DatePickerDialog.OnDateSetListener expiryDate = new DatePickerDialog.OnDateSetListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -205,10 +267,13 @@ public class AddProductActivity extends AppCompatActivity {
                 myCalendar.set(Calendar.YEAR, year);
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                myCalendar.set(Calendar.HOUR_OF_DAY, 15);
+                myCalendar.set(Calendar.MINUTE, 0);
 
-                mExpiryDate = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(formatter);
+                mExpiryDate = myCalendar.getTime();
+                mExpiryDateAsString = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(mFormatter);
 
-                mExpiryDateEditTextView.setText(mExpiryDate);
+                mExpiryDateEditTextView.setText(mExpiryDateAsString);
             }
         };
 
@@ -240,27 +305,28 @@ public class AddProductActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.action_save_product:
-                mProductName = mEditProductNameView.getText().toString().trim();
-                mProductCategory = mProductCategoryOptionsSpinner.getSelectedItem().toString().trim();
-//        String recognizedExpiryDateAlternative = mRecognizedDateOptionsSpinner.getSelectedItem().toString();
-                mAdditionalNote = mEditAdditionalNoteView.getText().toString().trim();
 
                 boolean isValid = true;
 
-                if (TextUtils.isEmpty(mProductName)) {
+                if (TextUtils.isEmpty(mEditProductNameView.getText())) {
                     mEditProductNameView.setError("Product name is required");
                     isValid = false;
                 }
-                if (TextUtils.isEmpty(mPurchaseDate)) {
+                if (TextUtils.isEmpty(mPurchaseDateEditTextView.getText())) {
                     mPurchaseDateEditTextView.setError("Purchase date is required");
                     isValid = false;
                 }
-                if (TextUtils.isEmpty(mExpiryDate)) {
+                if (TextUtils.isEmpty(mExpiryDateEditTextView.getText())) {
                     mExpiryDateEditTextView.setError("Expiry date is required");
                     isValid = false;
                 }
 
                 if (isValid) {
+
+                    mProductName = mEditProductNameView.getText().toString().trim();
+                    mProductCategory = mProductCategoryOptionsSpinner.getSelectedItem().toString().trim();
+                    mAdditionalNote = mEditAdditionalNoteView.getText().toString().trim();
+
                     this.saveProduct();
                 }
 
@@ -301,15 +367,17 @@ public class AddProductActivity extends AppCompatActivity {
 
         // TODO: Check if alternative date is chosen
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference databaseReference = database.getReference("products").child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()));
-        final String key = databaseReference.push().getKey();
+        final DatabaseReference databaseReference = mDatabase
+                .getReference("products")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance()
+                        .getUid()));
+
+        final String key = mProductToEdit == null ? databaseReference.push().getKey() : mProductToEdit.getId();
 
         if (key != null) {
-            FirebaseStorage storage = FirebaseStorage.getInstance();
 
             if (mProductImageBitmap != null) {
-                final StorageReference storageRef = storage.getReference("products").child(FirebaseAuth.getInstance().getUid()).child(key + ".jpg");
+                final StorageReference storageRef = mStorage.getReference("products").child(FirebaseAuth.getInstance().getUid()).child(key + ".jpg");
 
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 mProductImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
@@ -325,9 +393,10 @@ public class AddProductActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                        Product product = new Product(key, mProductName, mProductCategory, mPurchaseDate, mExpiryDate, mAdditionalNote, storageRef.getPath());
+                        final Product product = new Product(key, mProductName, mProductCategory, mPurchaseDateAsString, mExpiryDateAsString, mAdditionalNote, storageRef.getPath());
 
                         databaseReference.child(key).setValue(product, new DatabaseReference.CompletionListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.O)
                             @Override
                             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
@@ -340,7 +409,8 @@ public class AddProductActivity extends AppCompatActivity {
                                     Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
                                     snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
 
-                                    scheduleNotification(getNotification("test"), 2000);
+                                    long delay = mExpiryDate.getTime() - mPurchaseDate.getTime();
+                                    scheduleNotification(getNotification(product.getProductName()), delay);
 
                                     snackbar.show();
                                 }
@@ -350,9 +420,10 @@ public class AddProductActivity extends AppCompatActivity {
                 });
             } else {
 
-                Product product = new Product(key, mProductName, mProductCategory, mPurchaseDate, mExpiryDate, mAdditionalNote, null);
+                final Product product = new Product(key, mProductName, mProductCategory, mPurchaseDateAsString, mExpiryDateAsString, mAdditionalNote, null);
 
                 databaseReference.child(key).setValue(product, new DatabaseReference.CompletionListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
                     @Override
                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
 
@@ -365,7 +436,8 @@ public class AddProductActivity extends AppCompatActivity {
                             Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
                             snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
 
-                            scheduleNotification(getNotification("test"), 2000);
+                            long delay = mExpiryDate.getTime() - mPurchaseDate.getTime();
+                            scheduleNotification(getNotification(product.getProductName()), delay);
 
                             snackbar.show();
                         }
@@ -552,9 +624,9 @@ public class AddProductActivity extends AppCompatActivity {
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+//        long futureInMillis = System.currentTimeMillis() + delay;
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, mExpiryDate.getTime(), pendingIntent);
     }
 
     private Notification getNotification(String content) {
@@ -579,6 +651,8 @@ public class AddProductActivity extends AppCompatActivity {
         return builder.build();
     }
 
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void clearTextView() {
         ViewGroup group = findViewById(R.id.add_product_layout);
         for (int i = 0, count = group.getChildCount(); i < count; ++i) {
@@ -587,6 +661,9 @@ public class AddProductActivity extends AppCompatActivity {
                 ((EditText) view).setText("");
             }
         }
+
+        mPurchaseDateAsString = LocalDate.now().format(mFormatter);
+        mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
     }
 
 }

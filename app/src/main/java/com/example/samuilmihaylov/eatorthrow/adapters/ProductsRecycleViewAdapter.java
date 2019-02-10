@@ -1,5 +1,7 @@
 package com.example.samuilmihaylov.eatorthrow.adapters;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.samuilmihaylov.eatorthrow.R;
+import com.example.samuilmihaylov.eatorthrow.activities.AddProductActivity;
 import com.example.samuilmihaylov.eatorthrow.models.Product;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,10 +36,13 @@ import androidx.annotation.RequiresApi;
 
 public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRecycleViewAdapter.ViewHolder> {
 
+    private static final int REQUEST_FOR_ACTIVITY_CODE = 9;
+
     private final FirebaseDatabase database;
     private final FirebaseAuth auth;
     private ArrayList<Product> products;
     private FirebaseStorage storage;
+    private Context mContext;
 
     public ProductsRecycleViewAdapter(ArrayList<Product> products) {
         this.products = products;
@@ -50,6 +56,8 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
     @Override
     public ProductsRecycleViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                                     int viewType) {
+        mContext = parent.getContext();
+
         // create a new view
         CardView view = (CardView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.product_item, parent, false);
@@ -87,6 +95,15 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
                 }
             });
         }
+
+        holder.mEditProductBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, AddProductActivity.class);
+                intent.putExtra("product", product);
+                mContext.startActivity(intent);
+            }
+        });
 
         holder.mDeleteProductBtn.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -132,6 +149,7 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
         private final TextView mProductAdditionalNote;
         private final ImageView mProductImage;
         private final Button mDeleteProductBtn;
+        private final Button mEditProductBtn;
 
         ViewHolder(CardView cardView) {
             super(cardView);
@@ -142,6 +160,7 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
             mProductAdditionalNote = cardView.findViewById(R.id.product_additional_note_text_value);
             mProductImage = cardView.findViewById(R.id.product_photo_image_id);
             mDeleteProductBtn = cardView.findViewById(R.id.delete_btn_id);
+            mEditProductBtn = cardView.findViewById(R.id.edit_btn_id);
         }
     }
 }
