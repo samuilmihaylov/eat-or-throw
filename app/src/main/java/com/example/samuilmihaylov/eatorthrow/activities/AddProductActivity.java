@@ -121,6 +121,10 @@ public class AddProductActivity extends AppCompatActivity {
     private FirebaseDatabase mDatabase;
     private FirebaseStorage mStorage;
     private Product mProductToEdit;
+    private DatePickerDialog mExpiryDatePickerDialog;
+
+    private Calendar mExpiryDateCalendar;
+    private Calendar mPurchaseDateCalendar;
 
     public AddProductActivity() {
         // Required empty public constructor
@@ -164,9 +168,91 @@ public class AddProductActivity extends AppCompatActivity {
         mPurchaseDateEditTextView = findViewById(R.id.from_date_id);
         mExpiryDateEditTextView = findViewById(R.id.to_date_id);
 
-        final Calendar myCalendar = Calendar.getInstance();
+        mPurchaseDateCalendar = Calendar.getInstance();
+        mExpiryDateCalendar = Calendar.getInstance();
+
         mFormatter = new DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter();
 
+        this.initializeProductIfExistsInIntent();
+        this.initializeProductCategories();
+
+        ImageButton snapProductButton = findViewById(R.id.snap_product_btn_id);
+        snapProductButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent(ImageCaptureActionType.REQUEST_IMAGE_CAPTURE_PRODUCT);
+            }
+        });
+
+        ImageButton snapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
+        snapExpireDateButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent(ImageCaptureActionType.REQUEST_IMAGE_CAPTURE_EXPIRE_DATE);
+            }
+        });
+
+        final DatePickerDialog.OnDateSetListener purchaseDate = new DatePickerDialog.OnDateSetListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+
+                mPurchaseDateCalendar.set(Calendar.YEAR, year);
+                mPurchaseDateCalendar.set(Calendar.MONTH, monthOfYear);
+                mPurchaseDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                mPurchaseDate = mPurchaseDateCalendar.getTime();
+                mPurchaseDateAsString = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(mFormatter);
+
+                mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
+            }
+        };
+
+        mPurchaseDateEditTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(AddProductActivity.this, purchaseDate,
+                        mPurchaseDateCalendar.get(Calendar.YEAR),
+                        mPurchaseDateCalendar.get(Calendar.MONTH),
+                        mPurchaseDateCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+        final DatePickerDialog.OnDateSetListener expiryDate = new DatePickerDialog.OnDateSetListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+
+                mExpiryDateCalendar.set(Calendar.YEAR, year);
+                mExpiryDateCalendar.set(Calendar.MONTH, monthOfYear);
+                mExpiryDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                mExpiryDate = mExpiryDateCalendar.getTime();
+                mExpiryDateAsString = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(mFormatter);
+
+                mExpiryDateEditTextView.setText(mExpiryDateAsString);
+            }
+        };
+
+        mExpiryDateEditTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mExpiryDatePickerDialog = new DatePickerDialog(AddProductActivity.this, expiryDate,
+                        mExpiryDateCalendar.get(Calendar.YEAR),
+                        mExpiryDateCalendar.get(Calendar.MONTH),
+                        mExpiryDateCalendar.get(Calendar.DAY_OF_MONTH));
+
+                mExpiryDatePickerDialog.getDatePicker().setMinDate(mExpiryDateCalendar.getTimeInMillis());
+                mExpiryDatePickerDialog.show();
+            }
+        });
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void initializeProductIfExistsInIntent() {
         Product product = (Product) getIntent().getSerializableExtra("product");
 
         if (product != null) {
@@ -191,6 +277,18 @@ public class AddProductActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            String[] expiryDateSplit = product.getExpiryDate().split("/");
+            int expiryDate = Integer.valueOf(expiryDateSplit[0]);
+            int expiryMonth = Integer.valueOf(expiryDateSplit[1]);
+            int expiryYear = Integer.valueOf(expiryDateSplit[2]);
+            mExpiryDateCalendar.set(expiryYear, expiryMonth, expiryDate);
+
+            String[] purchaseDateSplit = product.getPurchaseDate().split("/");
+            int purchaseDate = Integer.valueOf(purchaseDateSplit[0]);
+            int purchaseMonth = Integer.valueOf(purchaseDateSplit[1]);
+            int purchaseYear = Integer.valueOf(purchaseDateSplit[2]);
+            mPurchaseDateCalendar.set(purchaseYear, purchaseMonth, purchaseDate);
+
             if (product.getProductImageUrl() != null) {
                 final StorageReference storageRef = mStorage.getReference();
                 storageRef.child(product.getProductImageUrl()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -207,88 +305,10 @@ public class AddProductActivity extends AppCompatActivity {
                 });
             }
         } else {
-            mPurchaseDate = myCalendar.getTime();
+            mPurchaseDate = mPurchaseDateCalendar.getTime();
             mPurchaseDateAsString = LocalDate.now().format(mFormatter);
             mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
         }
-
-        this.initializeProductCategories();
-
-        ImageButton snapProductButton = findViewById(R.id.snap_product_btn_id);
-        snapProductButton.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void onClick(View view) {
-                dispatchTakePictureIntent(ImageCaptureActionType.REQUEST_IMAGE_CAPTURE_PRODUCT);
-            }
-        });
-
-        ImageButton snapExpireDateButton = findViewById(R.id.snap_expire_date_btn_id);
-        snapExpireDateButton.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void onClick(View view) {
-//                clearTextView();
-                dispatchTakePictureIntent(ImageCaptureActionType.REQUEST_IMAGE_CAPTURE_EXPIRE_DATE);
-            }
-        });
-
-        final DatePickerDialog.OnDateSetListener purchaseDate = new DatePickerDialog.OnDateSetListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, monthOfYear);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                mPurchaseDate = myCalendar.getTime();
-                mPurchaseDateAsString = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(mFormatter);
-
-                mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
-            }
-        };
-
-        mPurchaseDateEditTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new DatePickerDialog(AddProductActivity.this, purchaseDate,
-                        myCalendar.get(Calendar.YEAR),
-                        myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
-
-        final DatePickerDialog.OnDateSetListener expiryDate = new DatePickerDialog.OnDateSetListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, monthOfYear);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                myCalendar.set(Calendar.HOUR_OF_DAY, 15);
-                myCalendar.set(Calendar.MINUTE, 0);
-
-                mExpiryDate = myCalendar.getTime();
-                mExpiryDateAsString = LocalDate.of(year, monthOfYear + 1, dayOfMonth).format(mFormatter);
-
-                mExpiryDateEditTextView.setText(mExpiryDateAsString);
-            }
-        };
-
-        mExpiryDateEditTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatePickerDialog expiryDatePickerDialog = new DatePickerDialog(AddProductActivity.this, expiryDate,
-                        myCalendar.get(Calendar.YEAR),
-                        myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH));
-
-                expiryDatePickerDialog.getDatePicker().setMinDate(myCalendar.getTimeInMillis());
-                expiryDatePickerDialog.show();
-            }
-        });
     }
 
     @Override
@@ -541,6 +561,7 @@ public class AddProductActivity extends AppCompatActivity {
         return null;
     }
 
+    @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void processTextRecognitionResult(FirebaseVisionText text) {
         List<FirebaseVisionText.TextBlock> blocks = text.getTextBlocks();
@@ -563,9 +584,7 @@ public class AddProductActivity extends AppCompatActivity {
 
                 if (date != null && !dateOptions.contains(date)) {
                     dateOptions.add(date);
-                    mExpiryDateEditTextView.setText(date);
-
-                    // TODO: Update datepicker
+                    setRecognizedExpiryDate(date);
                 }
 
                 List<FirebaseVisionText.Element> elements = lines.get(j).getElements();
@@ -577,9 +596,7 @@ public class AddProductActivity extends AppCompatActivity {
 
                     if (date != null && !dateOptions.contains(date)) {
                         dateOptions.add(date);
-                        mExpiryDateEditTextView.setText(date);
-
-                        // TODO: Update datepicker
+                        setRecognizedExpiryDate(date);
                     }
                 }
             }
@@ -595,6 +612,27 @@ public class AddProductActivity extends AppCompatActivity {
         if (dateOptions.isEmpty()) {
             NotificationLogger.showToast(getApplicationContext(), "Unsuccessful recognition of the expire date", MessageType.ERROR);
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void setRecognizedExpiryDate(String date) {
+        mExpiryDateEditTextView.setText(date);
+        mExpiryDateAsString = date;
+
+        SimpleDateFormat simpleDateFormat;
+        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            mExpiryDate = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String[] split = date.split("/");
+        int day = Integer.valueOf(split[0]);
+        int month = Integer.valueOf(split[1]);
+        int year = Integer.valueOf(split[2]);
+
+        mExpiryDateCalendar.set(year, month, day);
     }
 
     private void initializeProductCategories() {
