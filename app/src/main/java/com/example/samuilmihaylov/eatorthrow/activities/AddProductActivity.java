@@ -8,6 +8,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -662,16 +663,27 @@ public class AddProductActivity extends AppCompatActivity {
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-//        long futureInMillis = System.currentTimeMillis() + delay;
+        long futureInMillis = System.currentTimeMillis() + delay;
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, mExpiryDate.getTime(), pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent);
     }
 
-    private Notification getNotification(String content) {
+    private Notification getNotification(String productName) {
         Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentTitle("Scheduled Notification");
-        builder.setContentText(content);
-        builder.setSmallIcon(R.drawable.ic_launcher_background);
+        builder.setContentTitle("Product " + productName + " is expiring today");
+        builder.setContentText("Type to suggest fast recipes for this product");
+        builder.setSmallIcon(R.drawable.ic_groceries_placeholder);
+
+        Intent notifyIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+        notifyIntent.putExtra(SearchManager.QUERY, "cooking recipe with " + productName);
+
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        PendingIntent notifyPendingIntent = PendingIntent.getActivity(
+                this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setContentIntent(notifyPendingIntent);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -685,6 +697,7 @@ public class AddProductActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
             builder.setChannelId(channelId);
         }
+
 
         return builder.build();
     }
