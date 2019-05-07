@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EatOrThrow.iml" filepath="$PROJECT_DIR$/EatOrThrow.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eat-or-throw.iml" filepath="$PROJECT_DIR$/eat-or-throw.iml" />
     </modules>
   </component>
 </project>

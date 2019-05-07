@@ -46,7 +46,8 @@
     <string name="btn_sign_in">Sign in</string>
     <string name="btn_forgot_password">Forgot your password?</string>
     <string name="btn_link_to_register">Register</string>
-    <string name="or">or</string>
+    <string name="or">or with Google</string>
+    <string name="welcome_text">Welcome to</string>
     <string name="log_out">Sign out</string>
     <string name="action_help">Help</string>
     <string name="delete_product_text">Delete</string>

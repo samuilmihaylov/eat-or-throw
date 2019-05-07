@@ -31,9 +31,32 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/action_toolbar"
-        android:layout_marginTop="110dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="15dp"
+            android:gravity="center"
+            android:text="@string/welcome_text"
+            android:textColor="#5b9d3f"
+            android:textSize="36sp"
+            android:textStyle="italic" />
+
+        <ImageView
+            android:id="@+id/product_photo_image_id"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/photo_image_text"
+            android:maxWidth="300dp"
+            android:maxHeight="300dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo"
+            android:text="@string/photo_image_text" />
 
         <EditText
             android:id="@+id/input_email"
@@ -68,7 +91,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="100dp"
+            android:layout_width="150dp"
             android:layout_height="match_parent"
             android:layout_marginTop="15dp"
             android:gravity="center"
@@ -86,7 +109,7 @@
             android:id="@+id/btn_reset_password"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dip"
+            android:layout_marginTop="15dp"
             android:background="@null"
             android:text="@string/btn_forgot_password"
             android:textAllCaps="false"
@@ -96,9 +119,9 @@
             android:id="@+id/btn_sign_up"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:background="@null"
             android:text="@string/btn_link_to_register"
+            android:textStyle="bold"
             android:textAllCaps="false" />
 
     </LinearLayout>
