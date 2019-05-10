@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,13 +12,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.samuilmihaylov.eatorthrow.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -41,6 +43,12 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_STANDARD);
+
+        TextView textView = (TextView) signInButton.getChildAt(0);
+        textView.setText("Sign in with Google");
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -115,14 +123,16 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("Sing in", "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            hideProgressDialog();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("Sign in", "signInWithEmail:failure", task.getException());
-                            Toast.makeText(getApplicationContext(), "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                            hideProgressDialog();
+                            Snackbar unsuccessfulLoginNotification = Snackbar.make(findViewById(R.id.login_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT);
+                            unsuccessfulLoginNotification.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
 
-                        hideProgressDialog();
+                            unsuccessfulLoginNotification.show();
+                        }
                     }
 
                 });
@@ -167,7 +177,10 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         } else {
                             Log.w("Login", "signInWithCredential:failure", task.getException());
-                            Snackbar.make(findViewById(R.id.login_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar unsuccessfulLoginNotification = Snackbar.make(findViewById(R.id.login_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT);
+                            unsuccessfulLoginNotification.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+
+                            unsuccessfulLoginNotification.show();
                         }
 
                         hideProgressDialog();
