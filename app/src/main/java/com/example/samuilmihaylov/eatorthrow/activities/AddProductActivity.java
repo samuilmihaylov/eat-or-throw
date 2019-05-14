@@ -41,6 +41,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+
 import com.bumptech.glide.Glide;
 import com.example.samuilmihaylov.eatorthrow.R;
 import com.example.samuilmihaylov.eatorthrow.enums.ImageCaptureActionType;
@@ -79,14 +81,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.annotation.RequiresApi;
-
 public class AddProductActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE_PRODUCT = 1;
     private static final int REQUEST_IMAGE_CAPTURE_EXPIRE_DATE = 2;
 
+    private static final String BASE_DATE_FORMAT = "dd/MM/yyyy";
+
     private static final List<String> formatStrings = Arrays.asList(
+            BASE_DATE_FORMAT,
             "MM/yy",
             "MM/dd/yy",
             "MM-dd-yy",
@@ -96,7 +99,6 @@ public class AddProductActivity extends AppCompatActivity {
             "MM-dd-yyyy",
             "dd-MM-yy",
             "dd.MM.yy",
-            "dd/MM/yyyy",
             "dd-MM-yyyy",
             "dd.MM.yyyy",
             "dd MM yyyy",
@@ -119,6 +121,7 @@ public class AddProductActivity extends AppCompatActivity {
     private EditText mEditProductNameView;
     private EditText mEditAdditionalNoteView;
     private DateTimeFormatter mFormatter;
+    private SimpleDateFormat mSimpleDateFormat;
     private FirebaseDatabase mDatabase;
     private FirebaseStorage mStorage;
     private Product mProductToEdit;
@@ -172,7 +175,8 @@ public class AddProductActivity extends AppCompatActivity {
         mPurchaseDateCalendar = Calendar.getInstance();
         mExpiryDateCalendar = Calendar.getInstance();
 
-        mFormatter = new DateTimeFormatterBuilder().appendPattern("dd/MM/yyyy").toFormatter();
+        mFormatter = new DateTimeFormatterBuilder().appendPattern(BASE_DATE_FORMAT).toFormatter();
+        mSimpleDateFormat = new SimpleDateFormat(BASE_DATE_FORMAT);
 
         this.initializeProductIfExistsInIntent();
         this.initializeProductCategories();
@@ -270,24 +274,24 @@ public class AddProductActivity extends AppCompatActivity {
             mExpiryDateAsString = product.getExpiryDate();
             mAdditionalNote = product.getAdditionalNote();
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
             try {
-                mPurchaseDate = simpleDateFormat.parse(product.getPurchaseDate());
-                mExpiryDate = simpleDateFormat.parse(product.getExpiryDate());
+                mPurchaseDate = mSimpleDateFormat.parse(product.getPurchaseDate());
+                mExpiryDate = mSimpleDateFormat.parse(product.getExpiryDate());
             } catch (ParseException e) {
                 e.printStackTrace();
             }
 
             String[] expiryDateSplit = product.getExpiryDate().split("/");
-            int expiryDate = Integer.valueOf(expiryDateSplit[0]);
-            int expiryMonth = Integer.valueOf(expiryDateSplit[1]);
-            int expiryYear = Integer.valueOf(expiryDateSplit[2]);
+            int expiryDate = Integer.parseInt(expiryDateSplit[0]);
+            int expiryMonth = Integer.parseInt(expiryDateSplit[1]);
+            int expiryYear = Integer.parseInt(expiryDateSplit[2]);
             mExpiryDateCalendar.set(expiryYear, expiryMonth, expiryDate);
 
             String[] purchaseDateSplit = product.getPurchaseDate().split("/");
-            int purchaseDate = Integer.valueOf(purchaseDateSplit[0]);
-            int purchaseMonth = Integer.valueOf(purchaseDateSplit[1]);
-            int purchaseYear = Integer.valueOf(purchaseDateSplit[2]);
+            int purchaseDate = Integer.parseInt(purchaseDateSplit[0]);
+            int purchaseMonth = Integer.parseInt(purchaseDateSplit[1]);
+            int purchaseYear = Integer.parseInt(purchaseDateSplit[2]);
             mPurchaseDateCalendar.set(purchaseYear, purchaseMonth, purchaseDate);
 
             if (product.getProductImageUrl() != null) {
@@ -408,7 +412,7 @@ public class AddProductActivity extends AppCompatActivity {
                 uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
-                        // TODO: Handle this case
+                        // TODO: Handle this on failure case
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -536,7 +540,7 @@ public class AddProductActivity extends AppCompatActivity {
             try {
                 DateTimeFormatter formatter;
                 // We check if the date format pattern contains days
-                // If true, we have to define a default value for the day because LocalDate needs the day, month and year to be built.
+                // If not, we have to define a default value for the day because LocalDate needs the day, month and year to be built.
                 if (!formatString.contains("d")) {
                     formatter = new DateTimeFormatterBuilder()
                             .appendPattern(formatString)
@@ -552,7 +556,7 @@ public class AddProductActivity extends AppCompatActivity {
 
                 return localDate.format(
                         DateTimeFormatter.ofPattern(
-                                "dd/MM/yyyy"));
+                                BASE_DATE_FORMAT));
 
             } catch (DateTimeParseException e) {
                 Log.e("Expire date parsing", e.getParsedString());
@@ -620,18 +624,16 @@ public class AddProductActivity extends AppCompatActivity {
         mExpiryDateEditTextView.setText(date);
         mExpiryDateAsString = date;
 
-        SimpleDateFormat simpleDateFormat;
-        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         try {
-            mExpiryDate = simpleDateFormat.parse(date);
+            mExpiryDate = mSimpleDateFormat.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.e("Expiry date parsing", "Could not parse the given string to date");
         }
 
         String[] split = date.split("/");
-        int day = Integer.valueOf(split[0]);
-        int month = Integer.valueOf(split[1]);
-        int year = Integer.valueOf(split[2]);
+        int day = Integer.parseInt(split[0]);
+        int month = Integer.parseInt(split[1]);
+        int year = Integer.parseInt(split[2]);
 
         mExpiryDateCalendar.set(year, month, day);
     }
@@ -697,7 +699,6 @@ public class AddProductActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
             builder.setChannelId(channelId);
         }
-
 
         return builder.build();
     }
