@@ -310,6 +310,7 @@ public class AddProductActivity extends AppCompatActivity {
                 });
             }
         } else {
+            clearTextView();
             mPurchaseDate = mPurchaseDateCalendar.getTime();
             mPurchaseDateAsString = LocalDate.now().format(mFormatter);
             mPurchaseDateEditTextView.setText(mPurchaseDateAsString);
@@ -430,7 +431,6 @@ public class AddProductActivity extends AppCompatActivity {
                                     snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
                                     snackbar.show();
                                 } else {
-                                    clearTextView();
                                     Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
                                     snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
 
@@ -457,7 +457,6 @@ public class AddProductActivity extends AppCompatActivity {
                             snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
                             snackbar.show();
                         } else {
-                            clearTextView();
                             Snackbar snackbar = Snackbar.make(findViewById(R.id.add_product_layout), "Product saved", Snackbar.LENGTH_SHORT);
                             snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
 
