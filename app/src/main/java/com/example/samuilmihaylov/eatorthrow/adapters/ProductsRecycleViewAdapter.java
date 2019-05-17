@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.bumptech.glide.Glide;
 import com.example.samuilmihaylov.eatorthrow.R;
@@ -29,22 +33,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
-import androidx.annotation.RequiresApi;
 
 public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRecycleViewAdapter.ViewHolder> {
 
-    private static final int REQUEST_FOR_ACTIVITY_CODE = 9;
-
     private final FirebaseDatabase database;
     private final FirebaseAuth auth;
-    private ArrayList<Product> products;
+    private List<Product> products;
     private FirebaseStorage storage;
     private Context mContext;
+    private ViewGroup mParent;
 
-    public ProductsRecycleViewAdapter(ArrayList<Product> products) {
+    public ProductsRecycleViewAdapter(List<Product> products) {
         this.products = products;
         this.storage = FirebaseStorage.getInstance();
         this.database = FirebaseDatabase.getInstance();
@@ -57,6 +58,7 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
     public ProductsRecycleViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                                     int viewType) {
         mContext = parent.getContext();
+        mParent = parent;
 
         // create a new view
         CardView view = (CardView) LayoutInflater.from(parent.getContext())
@@ -108,7 +110,7 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
         holder.mDeleteProductBtn.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 databaseRef.child(product.getId()).setValue(null, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
@@ -126,6 +128,11 @@ public class ProductsRecycleViewAdapter extends RecyclerView.Adapter<ProductsRec
                                 }
                             });
                         }
+
+                        View mainLayoutView = (View) mParent.getParent();
+                        Snackbar snackbar = Snackbar.make(mainLayoutView, "Product " + holder.mProductName.getText() + " deleted successfully", Snackbar.LENGTH_SHORT);
+                        snackbar.getView().setBackgroundColor(ContextCompat.getColor(mainLayoutView.getContext(), R.color.colorPrimary));
+                        snackbar.show();
                     }
                 });
             }
